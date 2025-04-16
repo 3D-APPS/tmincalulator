@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Thickness Calculators</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .calculator {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: #333;
+        }
+        
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        
+        .tab button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            background-color: white;
+        }
+        
+        .show {
+            display: block;
+        }
+        
+        .formula {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Print styles for PDF export */
+        @media print {
+            .tab, .calculator:not(.result-container), button:not(.export-pdf-btn) {
+                display: none !important;
+            }
+            
+            .result-for-print {
+                display: block !important;
+                padding: 20px;
+            }
+            
+            .print-header {
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Minimum Thickness Calculators</h1>
+    
+    <div class="container">
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'API 510')">API 510</button>
+            <button class="tablinks" onclick="openTab(event, 'API 570')">API 570</button>
+            <button class="tablinks" onclick="openTab(event, 'API 653')">API 653</button>
+            <button class="tablinks" onclick="openTab(event, 'API653-Stresses')">API 653 Table 4.1b</button>
+        </div>
+        
+        <!-- API 510 Calculator -->
+        <div id="API 510" class="tabcontent show">
+            <h2>Pressure Vessel Minimum Thickness Calculator</h2>
+            
+            <div class="calculator">
+                <h3>Component Type</h3>
+                <div class="input-group">
+                    <select id="asmeviii-component">
+                        <option value="cylindrical-shell">Cylindrical Shell</option>
+                        <option value="spherical-shell">Spherical Shell</option>
+                        <option value="elliptical-head">Elliptical Head (2:1)</option>
+                        <option value="hemispherical-head">Hemispherical Head</option>
+                        <option value="torispherical-head">Torispherical Head (ASME Flanged & Dished)</option>
+                        <option value="nozzle">Nozzle/Opening</option>
+                    </select>
+                </div>
+                
+                <h3>Design Parameters</h3>
+                <div class="input-group">
+                    <label for="asmeviii-pressure">Design Pressure (P) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Internal pressure in psi or MPa</span></span></label>
+                    <input type="number" id="asmeviii-pressure" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="asmeviii-diameter" id="asmeviii-diameter-label">Inside Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext" id="asmeviii-diameter-tooltip">Inside diameter in inches or mm</span></span></label>
+                    <input type="number" id="asmeviii-diameter" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="asmeviii-allowable-stress">Allowable Stress (S) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Material allowable stress at design temperature</span></span></label>
+                    <input type="number" id="asmeviii-allowable-stress" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="asmeviii-joint-efficiency">Joint Efficiency (E) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Weld joint efficiency factor (0.7-1.0)</span></span></label>
+                    <input type="number" id="asmeviii-joint-efficiency" value="" step="0.01" min="0.7" max="1.0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="asmeviii-corrosion-allowance">Corrosion Allowance <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Additional thickness for corrosion</span></span></label>
+                    <input type="number" id="asmeviii-corrosion-allowance" value="" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="asmeviii-units">Units</label>
+                    <select id="asmeviii-units">
+                        <option value="imperial">US Customary (psi, inches)</option>
+                        <option value="metric">Metric (MPa, mm)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateASMEVIII()">Calculate Minimum Thickness</button>
+                
+                <div id="asmeviii-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="calculator">
+                <h3>Applicable Formulas</h3>
+                <h4>Cylindrical Shell (Internal Pressure)</h4>
+                <div class="formula">
+                    For circumferential stress: t = (P × R) / (S × E - 0.6 × P) + CA<br>
+                    For longitudinal stress: t = (P × R) / (2 × S × E + 0.4 × P) + CA<br>
+                    <small>Where R = inside radius and the greater thickness from both formulas is used</small>
+                </div>
+                
+                <h4>Spherical Shell (Internal Pressure)</h4>
+                <div class="formula">
+                    t = (P × R) / (2 × S × E - 0.2 × P) + CA
+                </div>
+                
+                <h4>Elliptical Head (2:1 Semi-Elliptical)</h4>
+                <div class="formula">
+                    t = (P × D × K) / (2 × S × E - 0.2 × P) + CA<br>
+                    <small>Where K = factor based on D/2h ratio (K = 1 for 2:1 ratio)</small>
+                </div>
+                
+                <h4>Hemispherical Head</h4>
+                <div class="formula">
+                    t = (P × R) / (2 × S × E - 0.2 × P) + CA
+                </div>
+                
+                <h4>Torispherical (F&D) Head</h4>
+                <div class="formula">
+                    t = (0.885 × P × L) / (S × E - 0.1 × P) + CA<br>
+                    <small>Where L = crown radius (inside diameter for standard ASME F&D heads)</small>
+                </div>
+            </div>
+        </div>
+        
+<!-- API 570 Calculator with Structural Requirements -->
+<div id="API 570" class="tabcontent">
+    <h2>Piping Minimum Thickness Calculator</h2>
+    
+    <div class="calculator">
+        <h3>Design Parameters</h3>
+        <div class="input-group">
+            <label for="asmeb31-pressure">Design Pressure (P) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Internal pressure in psi or MPa</span></span></label>
+            <input type="number" id="asmeb31-pressure" step="0.001" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-diameter">Outside Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Outside diameter in inches or mm</span></span></label>
+            <input type="number" id="asmeb31-diameter" step="0.001" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-allowable-stress">Allowable Stress (S) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Material allowable stress at design temperature</span></span></label>
+            <input type="number" id="asmeb31-allowable-stress" step="0.001" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-joint-efficiency">Weld Joint Factor (E) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Longitudinal weld joint factor</span></span></label>
+            <input type="number" id="asmeb31-joint-efficiency" value="" step="0.01" min="0.4" max="1.0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-y-coefficient">Y Coefficient <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Temperature coefficient (0.4 for ≤ 900°F, 0.7 for > 900°F)</span></span></label>
+            <input type="number" id="asmeb31-y-coefficient" value="0.4" step="0.1" min="0.4" max="0.7">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-corrosion-allowance">Corrosion Allowance <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Additional thickness for corrosion</span></span></label>
+            <input type="number" id="asmeb31-corrosion-allowance" value="" step="0.001" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-mill-tolerance">Mill Tolerance (%) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Negative thickness tolerance (typically 12.5%)</span></span></label>
+            <input type="number" id="asmeb31-mill-tolerance" value="" step="0.1" min="0" max="20">
+        </div>
+        
+        <h3>API 574 Structural Parameters</h3>
+        
+        <div class="input-group">
+            <label for="asmeb31-material">Pipe Material <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Material type affects structural minimum thickness</span></span></label>
+            <select id="asmeb31-material">
+                <option value="carbon">Carbon Steel</option>
+                <option value="austenitic">Austenitic Stainless Steel</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-pressure-class">Pressure Class <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">ASME B16.5 flange class</span></span></label>
+            <select id="asmeb31-pressure-class">
+                <option value="150">Class 150</option>
+                <option value="300">Class 300</option>
+                <option value="600">Class 600</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-temperature">Design Temperature <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Design temperature in °F</span></span></label>
+            <input type="number" id="asmeb31-temperature" value="" step="10" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-span">Span Length <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Distance between pipe supports in feet</span></span></label>
+            <input type="number" id="asmeb31-span" step="0.1" min="0" placeholder="Optional">
+        </div>
+        
+        <div class="input-group">
+            <label for="asmeb31-units">Units</label>
+            <select id="asmeb31-units">
+                <option value="imperial">US Customary (psi, inches)</option>
+                <option value="metric">Metric (MPa, mm)</option>
+            </select>
+        </div>
+        
+        <button onclick="calculateASMEB31()">Calculate Minimum Thickness</button>
+        
+        <div id="asmeb31-result" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="calculator">
+        <h3>Applicable Formulas</h3>
+        <div class="formula">
+            <h4>Pressure Design Thickness:</h4>
+            t<sub>pressure</sub> = (P × D) / (2 × (S × E + P × Y)) + CA<br>
+            <small>Where:<br>
+            t<sub>pressure</sub> = minimum required thickness based on pressure<br>
+            P = internal design pressure<br>
+            D = outside diameter<br>
+            S = allowable stress<br>
+            E = longitudinal weld joint factor<br>
+            Y = temperature coefficient<br>
+            CA = corrosion allowance</small>
+        </div>
+        
+        <div class="formula">
+            <h4>Structural Minimum Thickness (API 574):</h4>
+            t<sub>structural</sub> = t<sub>table</sub> + CA<br>
+            <small>Where:<br>
+            t<sub>structural</sub> = minimum required thickness based on structural considerations<br>
+            t<sub>table</sub> = base thickness from API 574 Tables D.2a or D.3a<br>
+            CA = corrosion allowance</small>
+        </div>
+        
+        <div class="formula">
+            <h4>Final Minimum Required Thickness:</h4>
+            t<sub>min</sub> = MAX(t<sub>pressure</sub>, t<sub>structural</sub>)<br>
+            <small>The greater of the pressure design thickness and structural minimum thickness</small>
+        </div>
+        
+        <h4>Notes:</h4>
+        <ul>
+            <li>For straight pipe under internal pressure.</li>
+            <li>For bends, elbows, and other fittings, additional factors apply.</li>
+            <li>Mill tolerance is applied as an additional factor to account for manufacturing variation.</li>
+            <li>Structural minimum thickness prevents collapse, mechanical damage, and ensures adequate rigidity.</li>
+            <li>API 574 tables used are based on the 5th Edition, March 2025.</li>
+        </ul>
+        
+        <h4>API 574 Structural Minimum Thickness Tables</h4>
+        
+        <div class="section" style="margin-top: 15px;">TABLE D.2a Carbon Steel @ 400°F</div>
+        <table>
+            <tr>
+                <th>NPS</th>
+                <th>150</th>
+                <th>300</th>
+                <th>600</th>
+            </tr>
+            <tr><td>0.5</td><td>0.050</td><td>0.050</td><td>0.050</td></tr>
+            <tr><td>0.75</td><td>0.050</td><td>0.050</td><td>0.050</td></tr>
+            <tr><td>1</td><td>0.050</td><td>0.050</td><td>0.055</td></tr>
+            <tr><td>1.5</td><td>0.050</td><td>0.050</td><td>0.070</td></tr>
+            <tr><td>2</td><td>0.050</td><td>0.055</td><td>0.080</td></tr>
+            <tr><td>3</td><td>0.065</td><td>0.095</td><td>0.135</td></tr>
+            <tr><td>4</td><td>0.060</td><td>0.095</td><td>0.155</td></tr>
+            <tr><td>6</td><td>0.050</td><td>0.100</td><td>0.175</td></tr>
+            <tr><td>8</td><td>0.060</td><td>0.115</td><td>0.215</td></tr>
+            <tr><td>10</td><td>0.080</td><td>0.130</td><td>0.245</td></tr>
+            <tr><td>12</td><td>0.090</td><td>0.145</td><td>0.270</td></tr>
+            <tr><td>14</td><td>0.090</td><td>0.155</td><td>0.300</td></tr>
+            <tr><td>16</td><td>0.100</td><td>0.175</td><td>0.330</td></tr>
+            <tr><td>18</td><td>0.110</td><td>0.185</td><td>0.355</td></tr>
+            <tr><td>20</td><td>0.120</td><td>0.210</td><td>0.385</td></tr>
+            <tr><td>24</td><td>0.140</td><td>0.245</td><td>0.450</td></tr>
+        </table>
+        
+        <div class="section" style="margin-top: 15px;">TABLE D.3a Austenitic SS @ 400°F</div>
+        <table>
+            <tr>
+                <th>NPS</th>
+                <th>150</th>
+                <th>300</th>
+                <th>600</th>
+            </tr>
+            <tr><td>0.5</td><td>0.050</td><td>0.050</td><td>0.050</td></tr>
+            <tr><td>0.75</td><td>0.050</td><td>0.050</td><td>0.050</td></tr>
+            <tr><td>1</td><td>0.050</td><td>0.050</td><td>0.055</td></tr>
+            <tr><td>1.5</td><td>0.050</td><td>0.050</td><td>0.065</td></tr>
+            <tr><td>2</td><td>0.050</td><td>0.050</td><td>0.075</td></tr>
+            <tr><td>3</td><td>0.070</td><td>0.095</td><td>0.130</td></tr>
+            <tr><td>4</td><td>0.060</td><td>0.090</td><td>0.145</td></tr>
+            <tr><td>6</td><td>0.055</td><td>0.090</td><td>0.160</td></tr>
+            <tr><td>8</td><td>0.060</td><td>0.105</td><td>0.195</td></tr>
+            <tr><td>10</td><td>0.080</td><td>0.120</td><td>0.220</td></tr>
+            <tr><td>12</td><td>0.090</td><td>0.130</td><td>0.240</td></tr>
+            <tr><td>14</td><td>0.090</td><td>0.140</td><td>0.265</td></tr>
+            <tr><td>16</td><td>0.100</td><td>0.155</td><td>0.290</td></tr>
+            <tr><td>18</td><td>0.110</td><td>0.165</td><td>0.315</td></tr>
+            <tr><td>20</td><td>0.120</td><td>0.185</td><td>0.335</td></tr>
+            <tr><td>24</td><td>0.140</td><td>0.215</td><td>0.390</td></tr>
+        </table>
+        
+        <div class="section" style="margin-top: 15px;">TABLE D.1 MAXIMUM SPAN LENGTH</div>
+        <table>
+            <tr>
+                <th>NPS</th>
+                <th>SPAN LENGTH (feet)</th>
+            </tr>
+            <tr><td>0.5</td><td>5</td></tr>
+            <tr><td>0.75</td><td>5.8</td></tr>
+            <tr><td>1</td><td>7</td></tr>
+            <tr><td>1.5</td><td>9</td></tr>
+            <tr><td>2</td><td>10</td></tr>
+            <tr><td>3</td><td>12</td></tr>
+            <tr><td>4</td><td>14</td></tr>
+            <tr><td>6</td><td>15.5</td></tr>
+            <tr><td>8</td><td>19</td></tr>
+            <tr><td>10</td><td>20</td></tr>
+            <tr><td>12</td><td>20</td></tr>
+            <tr><td>14</td><td>20</td></tr>
+            <tr><td>16</td><td>20</td></tr>
+            <tr><td>18</td><td>20</td></tr>
+            <tr><td>20</td><td>20</td></tr>
+            <tr><td>24</td><td>20</td></tr>
+        </table>
+        
+        <div style="margin-top: 15px; font-style: italic;">
+            <p>Review API RP 574 Annex D for other considerations which may affect the structural t-min, such as: span lengths exceeding Table D.1; heavy insulation, applied loads, specific gravity > 1, not applicable to piping with spring supports or excessive vibration.</p>
+            <p>Note: Tables for 750°F not shown.</p>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Temperature</th>
+                <th>Y Coefficient</th>
+            </tr>
+            <tr>
+                <td>≤ 900°F (482°C)</td>
+                <td>0.4</td>
+            </tr>
+            <tr>
+                <td>> 900°F (482°C)</td>
+                <td>0.7</td>
+            </tr>
+        </table>
+    </div>
+</div>
+        
+        <!-- API 653 Calculator -->
+        <div id="API 653" class="tabcontent">
+            <h2>Storage Tank Minimum Thickness Calculator</h2>
+            
+            <div class="calculator">
+                <h3>Design Parameters</h3>
+                <div class="input-group">
+                    <label for="api653-calculation-type">Calculation Type</label>
+                    <select id="api653-calculation-type">
+                        <option value="shell">Shell Course</option>
+                        <option value="bottom">Tank Bottom</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-diameter">Tank Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Nominal tank diameter in feet or meters</span></span></label>
+                    <input type="number" id="api653-diameter" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-height">Product Height (H) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Maximum product height in feet or meters</span></span></label>
+                    <input type="number" id="api653-height" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-sg">Specific Gravity (G) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Specific gravity of stored product</span></span></label>
+                    <input type="number" id="api653-sg" value="1.0" step="0.01" min="0.5" max="2.0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-course-height">Course Height (h) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">For shell calculations: height of the shell course in feet or meters</span></span></label>
+                    <input type="number" id="api653-course-height" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-allowable-stress">Allowable Stress (S) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Material allowable stress from API 653 Table 4.1b or calculated per API 653</span></span></label>
+                    <input type="number" id="api653-allowable-stress" step="0.001" min="0">
+                    <small><a href="#" onclick="openTab(event, 'API653-Stresses')">View API 653 Table 4.1b for stress values</a></small>
+                </div>
+                <div class="input-group">
+                    <label>Allowable Stress Calculation</label>
+                    <div class="formula">
+                        S is the maximum allowable stress in lbf/in<sup>2</sup>:<br>
+                        - For bottom and second course: use the smaller of 0.80Y or 0.429T<br>
+                        - For all other courses: use the smaller of 0.88Y or 0.472T<br>
+                        Where Y = minimum specified yield strength, T = minimum specified tensile strength
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-joint-efficiency">Joint Efficiency (E) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">
+<label for="api653-joint-efficiency">Joint Efficiency (E) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Weld joint efficiency factor</span></span></label>
+                    <input type="number" id="api653-joint-efficiency" value="0.85" step="0.01" min="0.7" max="1.0">
+                    <small><a href="#" onclick="toggleJointEfficiencyTable(); return false;">View API 653 Table 4.2b for Joint Efficiency values</a></small>
+                </div>
+                
+                <!-- Hidden Joint Efficiency Table -->
+                <div id="joint-efficiency-table" style="display: none; margin-top: 10px; margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
+                    <h4>Table 4.2b—Joint Efficiencies for Welded Joints, in USC Units</h4>
+                    <table>
+                        <tr>
+                            <th>Standard</th>
+                            <th>Edition and Year</th>
+                            <th>Type of Joint</th>
+                            <th>Joint Efficiency E</th>
+                            <th>Applicability or Limits</th>
+                        </tr>
+                        <tr>
+                            <td rowspan="7">API 650</td>
+                            <td rowspan="3">Seventh and Later (1980 to Present)</td>
+                            <td>Butt</td>
+                            <td>1.00</td>
+                            <td>Basic Standard</td>
+                        </tr>
+                        <tr>
+                            <td>Butt</td>
+                            <td>0.85</td>
+                            <td>Annex A Spot RT</td>
+                        </tr>
+                        <tr>
+                            <td>Butt</td>
+                            <td>0.70</td>
+                            <td>Annex A No RT</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">Third to Sixth (1966 to 1978)</td>
+                            <td>Butt</td>
+                            <td>0.85</td>
+                            <td>Basic Standard</td>
+                        </tr>
+                        <tr>
+                            <td>Butt</td>
+                            <td>1.00</td>
+                            <td>Annexes D or G</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">First and Second (1961 to 1978)</td>
+                            <td>Butt</td>
+                            <td>0.85</td>
+                            <td>Basic Standard</td>
+                        </tr>
+                        <tr>
+                            <td>Butt</td>
+                            <td>1.00</td>
+                            <td>Annex D</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="1">API 650</td>
+                            <td>14th and 15th (1957 to 1958)</td>
+                            <td>Butt</td>
+                            <td>0.85</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="5">API 12C</td>
+                            <td rowspan="2">3rd to 13th (1940 to 1956)</td>
+                            <td>Lap<sup>a</sup></td>
+                            <td>0.75</td>
+                            <td><sup>3</sup>/8 in. max, t</td>
+                        </tr>
+                        <tr>
+                            <td>Butt<sup>c</sup></td>
+                            <td>0.85</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3">First and Second (1936 to 1939)</td>
+                            <td>Lap<sup>a</sup></td>
+                            <td>0.70</td>
+                            <td><sup>7</sup>/16 in. max, t</td>
+                        </tr>
+                        <tr>
+                            <td>Lap<sup>b</sup></td>
+                            <td>0.50 + t/5</td>
+                            <td><sup>1</sup>/4 in. max, t</td>
+                        </tr>
+                        <tr>
+                            <td>Butt<sup>c</sup></td>
+                            <td>0.85</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="4">Unknown</td>
+                            <td rowspan="4">—</td>
+                            <td>Lap<sup>a</sup></td>
+                            <td>0.70</td>
+                            <td><sup>7</sup>/16 in. max, t</td>
+                        </tr>
+                        <tr>
+                            <td>Lap<sup>b</sup></td>
+                            <td>0.50 + t/5</td>
+                            <td><sup>1</sup>/4 in. max, t</td>
+                        </tr>
+                        <tr>
+                            <td>Butt</td>
+                            <td>0.70</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Lap<sup>d</sup></td>
+                            <td>0.35</td>
+                            <td>—</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top: 10px; font-size: 0.9em;">
+                        <p><sup>a</sup> Full double lap-welded.</p>
+                        <p><sup>b</sup> Full fillet weld with at least 25% intermittent full fillet opposite side; t = percent of intermittent weld expressed in decimal form.</p>
+                        <p><sup>c</sup> Single butt-welded joints with a back-up bar were permitted from the years of 1936 to 1940 and 1948 to 1954.</p>
+                        <p><sup>d</sup> Single lap-welded only.</p>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-ca">Corrosion Allowance <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Additional thickness for corrosion in inches or mm</span></span></label>
+                    <input type="number" id="api653-ca" value="" step="0.001" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="api653-units">Units</label>
+                    <select id="api653-units">
+                        <option value="imperial">US Customary (ft, inches, psi)</option>
+                        <option value="metric">Metric (m, mm, MPa)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateAPI653()">Calculate Minimum Thickness</button>
+                
+                <div id="api653-result" class="result" style="display: none;"></div>
+            </div>
+            
+            <div class="calculator">
+                <h3>Applicable Formulas</h3>
+                <h4>Shell Course (1-Foot Method)</h4>
+                <div class="formula">
+                    t = (2.6 × (H - 1) × D × G) / (S × E) + CA<br>
+                    <small>Where:<br>
+                    t = minimum required thickness (inches)<br>
+                    H = is the height from the bottom of the shell course under consideration to the maximum liquid level when
+                        evaluating an entire shell course, in feet; or<br> 
+                    H = is the height from the bottom of the length L (see 4.3.2.1) from the lowest point of the bottom of L of the
+                        locally thinned area to the maximum liquid level, in feet; or<br>
+                    H = is the height from the lowest point within any location of interest to the maximum liquid level, in feet<br>
+                    D = nominal tank diameter (feet)<br>
+                    G = specific gravity of fluid<br>
+                    S = allowable stress (psi)<br>
+                    E = joint efficiency<br>
+                    CA = corrosion allowance</small>
+                </div>
+                
+                <h4>Tank Bottom (Minimum Thickness)</h4>
+                <div class="formula">
+                    t = 0.039 × D × √G + CA<br>
+                    <small>Where:<br>
+                    t = minimum required thickness (inches)<br>
+                    D = nominal tank diameter (feet)<br>
+                    G = specific gravity of fluid<br>
+                    CA = corrosion allowance</small>
+                </div>
+                
+                <h4>Notes:</h4>
+                <ul>
+                    <li>For variable design point method, additional calculations are required.</li>
+                    <li>The 1-foot method is a simplified approach for standard atmospheric storage tanks.</li>
+                    <li>For large diameter tanks or special designs, consult API 653 standard for detailed requirements.</li>
+                    <li>S is the maximum allowable stress in lbf/in<sup>2</sup>; use the smaller of 0.80Y or 0.429T for bottom and second course; use the smaller of 0.88Y or 0.472T for all other courses. Allowable shell stresses are shown in Table 4.1 for materials listed in the current and previous editions of API 12C and API 650.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- API 653 Table 4.1b -->
+        <div id="API653-Stresses" class="tabcontent">
+            <h2>API 653 Table 4.1b—Maximum Allowable Shell Stresses, in USC Units</h2>
+            <p><em>(Not for Use for Reconstructed Tanks, See Note)</em></p>
+            
+            <div class="calculator">
+                <div class="input-group">
+                    <label for="api653-stress-search">Search:</label>
+                    <input type="text" id="api653-stress-search" onkeyup="filterAPI653Table()" placeholder="Type to search...">
+                </div>
+            </div>
+            
+            <div class="section">ASTM SPECIFICATIONS</div>
+            <div id="api653-astm-table">
+                <table>
+                    <tr>
+                        <th>Material Specification and Grade</th>
+                        <th>Minimum Specified Yield Stress, Y (lbf/in<sup>2</sup>)</th>
+                        <th>Minimum Specified Tensile Stress, T (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Product Stress, S (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Hydrostatic Test Stress, S<sub>1</sub> (lbf/in<sup>2</sup>)</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                    </tr>
+                    <tr><td>A283-C</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                    <tr><td>A285-C</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                    <tr><td>A36</td><td>36,000</td><td>58,000</td><td>24,900</td><td>27,400</td><td>27,400</td><td>30,100</td></tr>
+                    <tr><td>A131-A, B, CS</td><td>34,000</td><td>58,000</td><td>24,900</td><td>27,400</td><td>27,400</td><td>30,100</td></tr>
+                    <tr><td>A131-EH 36</td><td>51,000</td><td>71,000</td><td>30,500</td><td>33,500</td><td>33,500</td><td>36,800</td></tr>
+                    <tr><td>A573-58</td><td>32,000</td><td>58,000</td><td>24,900</td><td>27,400</td><td>27,400</td><td>28,800</td></tr>
+                    <tr><td>A573-65</td><td>35,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>31,500</td></tr>
+                    <tr><td>A573-70</td><td>42,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A516-55</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                    <tr><td>A516-60</td><td>32,000</td><td>60,000</td><td>25,600</td><td>28,200</td><td>28,200</td><td>28,800</td></tr>
+                    <tr><td>A516-65</td><td>35,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>31,500</td></tr>
+                    <tr><td>A516-70</td><td>38,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>34,200</td></tr>
+                    <tr><td>A662-B</td><td>40,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>33,700</td></tr>
+                    <tr><td>A662-C</td><td>43,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A537-Class 1</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A537-Class 2</td><td>60,000</td><td>80,000</td><td>34,300</td><td>37,800</td><td>37,800</td><td>41,500</td></tr>
+                    <tr><td>A633-C, D</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A678-A</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A678-B</td><td>60,000</td><td>80,000</td><td>34,300</td><td>37,800</td><td>37,800</td><td>41,500</td></tr>
+                    <tr><td>A737-B</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A841</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>A10*</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                    <tr><td>A7*</td><td>33,000</td><td>60,000</td><td>25,700</td><td>28,300</td><td>28,300</td><td>29,700</td></tr>
+                    <tr><td>A442-55*</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                    <tr><td>A442-60*</td><td>32,000</td><td>60,000</td><td>25,600</td><td>28,200</td><td>28,200</td><td>28,800</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">CSA SPECIFICATIONS</div>
+            <div id="api653-csa-table">
+                <table>
+                    <tr>
+                        <th>Material Specification and Grade</th>
+                        <th>Minimum Specified Yield Stress, Y (lbf/in<sup>2</sup>)</th>
+                        <th>Minimum Specified Tensile Stress, T (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Product Stress, S (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Hydrostatic Test Stress, S<sub>1</sub> (lbf/in<sup>2</sup>)</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                    </tr>
+                    <tr><td>G40.21, 38W</td><td>38,000</td><td>60,000</td><td>25,700</td><td>28,300</td><td>28,300</td><td>31,100</td></tr>
+                    <tr><td>G40.21, 44W</td><td>44,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>33,700</td></tr>
+                    <tr><td>G40.21, 44W (Type H)</td><td>44,000</td><td>64,000</td><td>27,400</td><td>30,200</td><td>30,700</td><td>33,200</td></tr>
+                    <tr><td>G40.21, 50W</td><td>50,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>33,700</td></tr>
+                    <tr><td>G40.21, 50WT</td><td>50,000</td><td>70,000</td><td>30,000</td><td>33,000</td><td>33,000</td><td>36,300</td></tr>
+                    <tr><td>G40.21, 50WT (Type H)</td><td>50,000</td><td>65,000</td><td>27,900</td><td>30,700</td><td>30,700</td><td>33,700</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">UNKNOWN MATERIAL SPECIFICATION AND GRADE</div>
+            <div id="api653-unknown-table">
+                <table>
+                    <tr>
+                        <th>Material Specification and Grade</th>
+                        <th>Minimum Specified Yield Stress, Y (lbf/in<sup>2</sup>)</th>
+                        <th>Minimum Specified Tensile Stress, T (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Product Stress, S (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Hydrostatic Test Stress, S<sub>1</sub> (lbf/in<sup>2</sup>)</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                    </tr>
+                    <tr><td>Unknown (Note 2)</td><td>30,000</td><td>55,000</td><td>23,600</td><td>26,000</td><td>26,000</td><td>27,000</td></tr>
+                </table>
+            </div>
+            
+            <div class="section">RIVETED TANKS</div>
+            <div id="api653-riveted-table">
+                <table>
+                    <tr>
+                        <th>Material Specification and Grade</th>
+                        <th>Minimum Specified Yield Stress, Y (lbf/in<sup>2</sup>)</th>
+                        <th>Minimum Specified Tensile Stress, T (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Product Stress, S (lbf/in<sup>2</sup>)</th>
+                        <th colspan="2">Allowable Hydrostatic Test Stress, S<sub>1</sub> (lbf/in<sup>2</sup>)</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                        <th>Lower Two Courses</th>
+                        <th>Upper Courses</th>
+                    </tr>
+                    <tr><td>A7, A9, or A10</td><td>NA</td><td>NA</td><td>21,000</td><td>21,000</td><td>21,000</td><td>21,000</td></tr>
+                    <tr><td>Known</td><td>Y</td><td>T</td><td colspan="2">Per API 653 4.3.4.2</td><td colspan="2">Per API 653 4.3.4.2</td></tr>
+                    <tr><td>Unknown</td><td>NA</td><td>NA</td><td>21,000</td><td>21,000</td><td>21,000</td><td>21,000</td></tr>
+                </table>
+            </div>
+            
+            <div class="calculator">
+                <h3>Notes:</h3>
+                <ol>
+                    <li>Allowable stresses for reconstructed tanks are tabulated in API 650, Table 5.2a or 5.2b, or calculated per 8.4.</li>
+                    <li>ASTM A7, ASTM A9, ASTM A10, and ASTM A442 are obsolete ASTM material specifications previously listed in API 12C and API 650.</li>
+                    <li>The allowable stresses are calculated per 4.3.3.1 and 4.3.3.2 of API 653 standard, unless otherwise noted. The calculated allowable stresses are rounded to the nearest 100 lbf/in<sup>2</sup>.</li>
+                    <li>For riveted tanks, constructed of known grades of material, evaluated per 4.3.4.2, for all courses, the maximum allowable shell stress for both product and hydrostatic test conditions are listed under column for allowable product stress, S.</li>
+                </ol>
+                
+                <h3>Integration with API 653 Calculator</h3>
+                <p>To use these allowable stress values in the API 653 calculator:</p>
+                <ol>
+                    <li>Find your tank material in the tables above</li>
+                    <li>Note the appropriate allowable stress value based on your tank course position (lower two courses or upper courses)</li>
+                    <li>Enter this value in the "Allowable Stress (S)" field in the API 653 calculator tab</li>
+                </ol>
+                <p>For unknown materials, use the default values provided in the "Unknown Material Specification and Grade" section.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update diameter/radius label based on component selection
+        document.getElementById("asmeviii-component").addEventListener("change", function() {
+            const component = this.value;
+            const diameterLabel = document.getElementById("asmeviii-diameter-label");
+            const diameterTooltip = document.getElementById("asmeviii-diameter-tooltip");
+            
+            // Check if the selected component is a head type
+            if (component.includes("head")) {
+                diameterLabel.innerHTML = 'Crown Radius (L) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Crown radius in inches or mm</span></span>';
+                diameterTooltip.innerText = "Crown radius in inches or mm";
+            } else {
+                diameterLabel.innerHTML = 'Inside Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Inside diameter in inches or mm</span></span>';
+                diameterTooltip.innerText = "Inside diameter in inches or mm";
+            }
+        });
+        
+        // Tab navigation
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Hide all tab content
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            // Remove active class from all tab buttons
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            // Show the selected tab and add active class to the button
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // ASME Section VIII Calculator
+        function calculateASMEVIII() {
+            // Get input values
+            const component = document.getElementById("asmeviii-component").value;
+            const pressure = Number(document.getElementById("asmeviii-pressure").value);
+            const diameter = Number(document.getElementById("asmeviii-diameter").value);
+            const allowableStress = Number(document.getElementById("asmeviii-allowable-stress").value);
+            const jointEfficiency = Number(document.getElementById("asmeviii-joint-efficiency").value);
+            const corrosionAllowance = Number(document.getElementById("asmeviii-corrosion-allowance").value);
+            const units = document.getElementById("asmeviii-units").value;
+            
+            // Validate inputs
+            if (!pressure || !diameter || !allowableStress) {
+                alert("Please enter all required values!");
+                return;
+            }
+            
+            // Calculate minimum thickness based on component type
+            let thickness = 0;
+            let formula = "";
+            const radius = diameter / 2;
+            
+            switch (component) {
+                case "cylindrical-shell":
+                    // Calculate thickness based on circumferential stress
+                    const tCirc = (pressure * radius) / (allowableStress * jointEfficiency - 0.6 * pressure);
+// Calculate thickness based on longitudinal stress
+                    const tLong = (pressure * radius) / (2 * allowableStress * jointEfficiency + 0.4 * pressure);
+                    
+                    // Use the greater of the two thicknesses
+                    const tWithoutCA = Math.max(tCirc, tLong);
+                    thickness = tWithoutCA + corrosionAllowance;
+                    
+                    let stressType = tCirc > tLong ? "circumferential" : "longitudinal";
+                    
+                    formula = `
+                    Circumferential stress: t = (P × R) / (S × E - 0.6 × P) = (${pressure.toFixed(2)} × ${radius.toFixed(2)}) / (${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.6 × ${pressure.toFixed(2)}) = ${tCirc.toFixed(4)}
+                    
+                    Longitudinal stress: t = (P × R) / (2 × S × E + 0.4 × P) = (${pressure.toFixed(2)} × ${radius.toFixed(2)}) / (2 × ${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} + 0.4 × ${pressure.toFixed(2)}) = ${tLong.toFixed(4)}
+                    
+                    Controlling stress: ${stressType} (${tWithoutCA.toFixed(4)})
+                    
+                    Final thickness with corrosion allowance: ${tWithoutCA.toFixed(4)} + ${corrosionAllowance.toFixed(3)} = ${thickness.toFixed(4)}
+                    `;
+                    break;
+                    
+                case "spherical-shell":
+                    thickness = (pressure * radius) / (2 * allowableStress * jointEfficiency - 0.2 * pressure) + corrosionAllowance;
+                    formula = `t = (P × R) / (2 × S × E - 0.2 × P) + CA = (${pressure.toFixed(2)} × ${radius.toFixed(2)}) / (2 × ${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.2 × ${pressure.toFixed(2)}) + ${corrosionAllowance.toFixed(3)}`;
+                    break;
+                    
+                case "elliptical-head":
+                    // For 2:1 elliptical head, K = 1
+                    const k = 1;
+                    thickness = (pressure * diameter * k) / (2 * allowableStress * jointEfficiency - 0.2 * pressure) + corrosionAllowance;
+                    formula = `t = (P × D × K) / (2 × S × E - 0.2 × P) + CA = (${pressure.toFixed(2)} × ${diameter.toFixed(2)} × ${k.toFixed(2)}) / (2 × ${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.2 × ${pressure.toFixed(2)}) + ${corrosionAllowance.toFixed(3)}`;
+                    break;
+                    
+                case "hemispherical-head":
+                    thickness = (pressure * radius) / (2 * allowableStress * jointEfficiency - 0.2 * pressure) + corrosionAllowance;
+                    formula = `t = (P × R) / (2 × S × E - 0.2 × P) + CA = (${pressure.toFixed(2)} × ${radius.toFixed(2)}) / (2 × ${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.2 × ${pressure.toFixed(2)}) + ${corrosionAllowance.toFixed(3)}`;
+                    break;
+                    
+                case "torispherical-head":
+                    // For standard ASME F&D head, L = inside diameter
+                    const L = diameter; // Inside crown radius equals inside diameter for standard ASME F&D
+                    thickness = (0.885 * pressure * L) / (allowableStress * jointEfficiency - 0.1 * pressure) + corrosionAllowance;
+                    formula = `t = (0.885 × P × L) / (S × E - 0.1 × P) + CA = (0.885 × ${pressure.toFixed(2)} × ${L.toFixed(2)}) / (${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.1 × ${pressure.toFixed(2)}) + ${corrosionAllowance.toFixed(3)}`;
+                    break;
+                    
+                case "nozzle":
+                    // Simplified approach for nozzle reinforcement
+                    thickness = (pressure * radius) / (allowableStress * jointEfficiency - 0.6 * pressure) + corrosionAllowance;
+                    const reinforcementArea = 2 * thickness * Math.sqrt(radius * thickness);
+                    formula = `Shell t = (P × R) / (S × E - 0.6 × P) + CA = (${pressure.toFixed(2)} × ${radius.toFixed(2)}) / (${allowableStress.toFixed(2)} × ${jointEfficiency.toFixed(2)} - 0.6 × ${pressure.toFixed(2)}) + ${corrosionAllowance.toFixed(3)}`;
+                    break;
+            }
+            
+            // Display results
+            const resultDiv = document.getElementById("asmeviii-result");
+            let unitStr = units === "imperial" ? "inches" : "mm";
+            let pressureUnitStr = units === "imperial" ? "psi" : "MPa";
+            
+            // Determine if we're displaying diameter or crown radius based on component type
+            let dimensionName;
+            if (component.includes("head")) {
+                dimensionName = "Crown Radius (L)";
+            } else {
+                dimensionName = component.includes("shell") ? "Inside Diameter (D)" : "Diameter (D)";
+            }
+            
+            resultDiv.innerHTML = `
+                <h3>Calculation Results</h3>
+                <p><strong>Minimum Required Thickness:</strong> <span style="color: red; font-weight: bold;">${thickness.toFixed(3)} ${unitStr}</span></p>
+                <p><strong>Formula Used:</strong><br>${formula}</p>
+                <p><strong>Input Parameters:</strong><br>
+                Pressure: ${pressure.toFixed(2)} ${pressureUnitStr}<br>
+                ${dimensionName}: ${diameter.toFixed(2)} ${unitStr}<br>
+                Allowable Stress: ${allowableStress.toFixed(2)} ${pressureUnitStr}<br>
+                Joint Efficiency: ${jointEfficiency.toFixed(2)}<br>
+                Corrosion Allowance: ${corrosionAllowance.toFixed(3)} ${unitStr}</p>
+            `;
+            
+            resultDiv.style.display = "block";
+        }
+        
+       // ASME B31.3 Calculator with API 574 Structural Requirements
+function calculateASMEB31() {
+    // Get input values
+    const pressure = Number(document.getElementById("asmeb31-pressure").value);
+    const diameter = Number(document.getElementById("asmeb31-diameter").value);
+    const allowableStress = Number(document.getElementById("asmeb31-allowable-stress").value);
+    const jointEfficiency = Number(document.getElementById("asmeb31-joint-efficiency").value);
+    const yCoefficient = Number(document.getElementById("asmeb31-y-coefficient").value);
+    const corrosionAllowance = Number(document.getElementById("asmeb31-corrosion-allowance").value);
+    const millTolerance = Number(document.getElementById("asmeb31-mill-tolerance").value) / 100;
+    const units = document.getElementById("asmeb31-units").value;
+    
+    // Check if the new elements exist before trying to access them
+    const pipeClassElement = document.getElementById("asmeb31-pressure-class");
+    const pipeTemperatureElement = document.getElementById("asmeb31-temperature");
+    const pipeSpanElement = document.getElementById("asmeb31-span");
+    const pipeMaterialElement = document.getElementById("asmeb31-material");
+    
+    // Get values from new elements if they exist, otherwise use defaults
+    const pipeClass = pipeClassElement ? pipeClassElement.value : "150";
+    const pipeTemperature = pipeTemperatureElement ? pipeTemperatureElement.value : "400";
+    const pipeSpan = pipeSpanElement ? Number(pipeSpanElement.value) : 0;
+    const pipeMaterial = pipeMaterialElement ? pipeMaterialElement.value : "carbon";
+    
+    // Validate inputs
+    if (!diameter) {
+        alert("Please enter pipe diameter!");
+        return;
+    }
+    
+    // Calculate pressure design thickness
+    let tm = 0;
+    if (pressure > 0 && allowableStress > 0) {
+        tm = (pressure * diameter) / (2 * (allowableStress * jointEfficiency + pressure * yCoefficient));
+    }
+    
+    const tPressure = tm + corrosionAllowance;
+    
+    // Calculate structural minimum thickness per API 574
+    let tStructural = 0;
+    let nominalPipeSize = 0;
+    
+    // Convert mm to inches for calculation if metric
+    const diameterInches = units === "metric" ? diameter / 25.4 : diameter;
+    
+    // Determine nominal pipe size (simplified)
+    if (diameterInches <= 0.84) {
+        nominalPipeSize = 0.5;
+    } else if (diameterInches <= 1.05) {
+        nominalPipeSize = 0.75;
+    } else if (diameterInches <= 1.32) {
+        nominalPipeSize = 1;
+    } else if (diameterInches <= 1.66) {
+        nominalPipeSize = 1.5;
+    } else if (diameterInches <= 2.375) {
+        nominalPipeSize = 2;
+    } else if (diameterInches <= 2.88) {
+        nominalPipeSize = 2.5;
+    } else if (diameterInches <= 3.5) {
+        nominalPipeSize = 3;
+    } else if (diameterInches <= 4.5) {
+        nominalPipeSize = 4;
+    } else if (diameterInches <= 5.563) {
+        nominalPipeSize = 5;
+    } else if (diameterInches <= 6.625) {
+        nominalPipeSize = 6;
+    } else if (diameterInches <= 8.625) {
+        nominalPipeSize = 8;
+    } else if (diameterInches <= 10.75) {
+        nominalPipeSize = 10;
+    } else if (diameterInches <= 12.75) {
+        nominalPipeSize = 12;
+    } else if (diameterInches <= 14.0) {
+        nominalPipeSize = 14;
+    } else if (diameterInches <= 16.0) {
+        nominalPipeSize = 16;
+    } else if (diameterInches <= 18.0) {
+        nominalPipeSize = 18;
+    } else if (diameterInches <= 20.0) {
+        nominalPipeSize = 20;
+    } else if (diameterInches <= 24.0) {
+        nominalPipeSize = 24;
+    } else {
+        nominalPipeSize = 30;
+    }
+    
+    // Get structural minimum thickness from API 574 tables
+    let structuralThickness = 0;
+    let pressureClassColumn = "150"; // Default to 150 class
+    let materialType = "carbon"; // Default to carbon steel
+    
+    // Determine which pressure class column to use
+    if (pipeClass === "300") {
+        pressureClassColumn = "300";
+    } else if (pipeClass === "600") {
+        pressureClassColumn = "600";
+    }
+    
+    // Determine which material table to use
+    if (pipeMaterial === "austenitic") {
+        materialType = "austenitic";
+    }
+    
+    // API 574 Table D.2a (Carbon Steel) and D.3a (Austenitic SS)
+    const api574Tables = {
+        "carbon": {
+            "150": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.050, 1.5: 0.050, 2: 0.050,
+                3: 0.065, 4: 0.060, 6: 0.050, 8: 0.060, 10: 0.080,
+                12: 0.090, 14: 0.090, 16: 0.100, 18: 0.110, 20: 0.120, 24: 0.140
+            },
+            "300": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.050, 1.5: 0.050, 2: 0.055,
+                3: 0.095, 4: 0.095, 6: 0.100, 8: 0.115, 10: 0.130,
+                12: 0.145, 14: 0.155, 16: 0.175, 18: 0.185, 20: 0.210, 24: 0.245
+            },
+            "600": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.055, 1.5: 0.070, 2: 0.080,
+                3: 0.135, 4: 0.155, 6: 0.175, 8: 0.215, 10: 0.245,
+                12: 0.270, 14: 0.300, 16: 0.330, 18: 0.355, 20: 0.385, 24: 0.450
+            }
+        },
+        "austenitic": {
+            "150": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.050, 1.5: 0.050, 2: 0.050,
+                3: 0.070, 4: 0.060, 6: 0.055, 8: 0.060, 10: 0.080,
+                12: 0.090, 14: 0.090, 16: 0.100, 18: 0.110, 20: 0.120, 24: 0.140
+            },
+            "300": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.050, 1.5: 0.050, 2: 0.050,
+                3: 0.095, 4: 0.090, 6: 0.090, 8: 0.105, 10: 0.120,
+                12: 0.130, 14: 0.140, 16: 0.155, 18: 0.165, 20: 0.185, 24: 0.215
+            },
+            "600": {
+                0.5: 0.050, 0.75: 0.050, 1: 0.055, 1.5: 0.065, 2: 0.075,
+                3: 0.130, 4: 0.145, 6: 0.160, 8: 0.195, 10: 0.220,
+                12: 0.240, 14: 0.265, 16: 0.290, 18: 0.315, 20: 0.335, 24: 0.390
+            }
+        }
+    };
+    
+    // API 574 Table D.1 Maximum Span Length
+    const maxSpanTable = {
+        0.5: 5, 0.75: 5.8, 1: 7, 1.5: 9, 2: 10,
+        3: 12, 4: 14, 6: 15.5, 8: 19, 10: 20,
+        12: 20, 14: 20, 16: 20, 18: 20, 20: 20, 24: 20
+    };
+    
+    // Get structural thickness from the tables
+    if (api574Tables[materialType] && 
+        api574Tables[materialType][pressureClassColumn] && 
+        api574Tables[materialType][pressureClassColumn][nominalPipeSize] !== undefined) {
+        structuralThickness = api574Tables[materialType][pressureClassColumn][nominalPipeSize];
+    } else {
+        // If not found in table, use a safe default or interpolate
+        structuralThickness = 0.100; // Default value
+    }
+    
+    // Check for span length considerations
+    let spanWarning = "";
+    if (pipeSpan > 0) {
+        const maxAllowedSpan = maxSpanTable[nominalPipeSize] || 20;
+        if (pipeSpan > maxAllowedSpan) {
+            spanWarning = `Warning: The specified span length (${pipeSpan} ft) exceeds the maximum recommended span (${maxAllowedSpan} ft) for NPS ${nominalPipeSize}. Additional structural considerations may be needed.`;
+        }
+    }
+    
+    // Add corrosion allowance to structural thickness
+    tStructural = structuralThickness + corrosionAllowance;
+    
+    // Convert back to mm if necessary
+    const tStructuralFinal = units === "metric" ? tStructural * 25.4 : tStructural;
+    
+    // Calculate final minimum thickness (greater of pressure and structural)
+    const tMin = Math.max(tPressure, tStructuralFinal);
+    
+    // Apply mill tolerance
+    const tWithTolerance = tMin / (1 - millTolerance);
+    
+    // Determine controlling criterion
+    const controllingCriterion = tPressure > tStructuralFinal ? "Pressure Design" : "Structural (API 574)";
+    
+    // Display results
+    const resultDiv = document.getElementById("asmeb31-result");
+    let unitStr = units === "imperial" ? "inches" : "mm";
+    let pressureUnitStr = units === "imperial" ? "psi" : "MPa";
+    
+    resultDiv.innerHTML = `
+        <h3>Calculation Results</h3>
+        <p><strong>Pressure Design Thickness:</strong> ${tPressure.toFixed(3)} ${unitStr}</p>
+        <p><strong>Structural Minimum Thickness (API 574):</strong> ${tStructuralFinal.toFixed(3)} ${unitStr}</p>
+        <p><strong>Controlling Criterion:</strong> ${controllingCriterion}</p>
+        <p><strong>Required Minimum Thickness:</strong> <span style="color: red; font-weight: bold;">${tWithTolerance.toFixed(3)} ${unitStr}</span></p>
+        
+        ${spanWarning ? `<p class="warning" style="color: orange; font-weight: bold;">${spanWarning}</p>` : ''}
+        
+        <h4>Calculation Details:</h4>
+        <p><strong>Pressure Design Formula:</strong><br>
+        tm = (P × D) / (2 × (S × E + P × Y))<br>
+        t = tm + CA</p>
+        
+        <p><strong>Structural Minimum (API 574 Table ${materialType === 'carbon' ? 'D.2a' : 'D.3a'}):</strong><br>
+        Base thickness from ${materialType === 'carbon' ? 'Carbon Steel' : 'Austenitic SS'} table for ${pressureClassColumn} class, NPS ${nominalPipeSize}": ${structuralThickness.toFixed(3)} inches<br>
+        t = ${structuralThickness.toFixed(3)} + ${corrosionAllowance.toFixed(3)} (CA) = ${tStructural.toFixed(3)} inches</p>
+        
+        <p><strong>Input Parameters:</strong><br>
+        Outside Diameter: ${diameter.toFixed(3)} ${unitStr} (${nominalPipeSize}" NPS)<br>
+        ${pressure ? `Pressure: ${pressure.toFixed(2)} ${pressureUnitStr}<br>` : ''}
+        Pressure Class: ${pressureClassColumn}<br>
+        Material: ${materialType === 'carbon' ? 'Carbon Steel' : 'Austenitic Stainless Steel'}<br>
+        ${allowableStress ? `Allowable Stress: ${allowableStress.toFixed(2)} ${pressureUnitStr}<br>` : ''}
+        ${pressure > 0 ? `Weld Joint Factor: ${jointEfficiency.toFixed(2)}<br>` : ''}
+        ${pressure > 0 ? `Y Coefficient: ${yCoefficient.toFixed(2)}<br>` : ''}
+        Corrosion Allowance: ${corrosionAllowance.toFixed(3)} ${unitStr}<br>
+        ${pipeSpan > 0 ? `Span Length: ${pipeSpan.toFixed(1)} ft<br>` : ''}
+        Mill Tolerance: ${(millTolerance * 100).toFixed(1)}%</p>
+    `;
+    
+    resultDiv.style.display = "block";
+}
+        
+        // API 653 Calculator
+        function calculateAPI653() {
+            // Get input values
+            const calcType = document.getElementById("api653-calculation-type").value;
+            const diameter = Number(document.getElementById("api653-diameter").value);
+            const productHeight = Number(document.getElementById("api653-height").value);
+            const specificGravity = Number(document.getElementById("api653-sg").value);
+            const courseHeight = Number(document.getElementById("api653-course-height").value);
+            const allowableStress = Number(document.getElementById("api653-allowable-stress").value);
+            const jointEfficiency = Number(document.getElementById("api653-joint-efficiency").value);
+            const corrosionAllowance = Number(document.getElementById("api653-ca").value);
+            const units = document.getElementById("api653-units").value;
+            
+            // Validate inputs
+            if (!diameter) {
+                alert("Please enter tank diameter!");
+                return;
+            }
+            
+            // Calculate minimum thickness based on calculation type
+            let thickness = 0;
+            let formula = "";
+            
+            if (calcType === "shell") {
+                // Validate additional inputs for shell calculation
+                if (!productHeight || !courseHeight || !allowableStress) {
+                    alert("Please enter all required values for shell calculation!");
+                    return;
+                }
+                
+                if (units === "imperial") {
+                    // Correct formula for shell course (imperial units)
+                    thickness = (2.6 * (productHeight - 1) * diameter * specificGravity) / (allowableStress * jointEfficiency) + corrosionAllowance;
+                    formula = `t = (2.6 × (H - 1) × D × G) / (S × E) + CA`;
+                } else {
+                    // Metric equivalent
+                    thickness = (0.0098 * (productHeight - 0.3048) * diameter * specificGravity) / (allowableStress * jointEfficiency) + corrosionAllowance;
+                    formula = `t = (0.0098 × (H - 0.3048) × D × G) / (S × E) + CA`;
+                }
+            } else {
+                // Bottom plate calculation
+                if (units === "imperial") {
+                    thickness = 0.039 * diameter * Math.sqrt(specificGravity) + corrosionAllowance;
+                    formula = `t = 0.039 × D × √G + CA`;
+                } else {
+                    // Metric equivalent
+                    thickness = 0.0077 * diameter * Math.sqrt(specificGravity) + corrosionAllowance;
+                    formula = `t = 0.0077 × D × √G + CA`;
+                }
+            }
+            
+            // Display results
+            const resultDiv = document.getElementById("api653-result");
+            let thicknessUnit = units === "imperial" ? "inches" : "mm";
+            let distanceUnit = units === "imperial" ? "feet" : "m";
+            let stressUnit = units === "imperial" ? "psi" : "MPa";
+            
+            resultDiv.innerHTML = `
+                <h3>Calculation Results</h3>
+                <p><strong>Component:</strong> ${calcType === "shell" ? "Tank Shell Course" : "Tank Bottom"}</p>
+                <p><strong>Minimum Required Thickness:</strong> <span style="color: red; font-weight: bold;">${thickness.toFixed(3)} ${thicknessUnit}</span></p>
+                <p><strong>Formula Used:</strong><br>${formula}</p>
+                <p><strong>Input Parameters:</strong><br>
+                Tank Diameter: ${diameter.toFixed(2)} ${distanceUnit}<br>
+                ${calcType === "shell" ? `Product Height: ${productHeight.toFixed(2)} ${distanceUnit}<br>
+                Course Height: ${courseHeight.toFixed(2)} ${distanceUnit}<br>
+                Allowable Stress: ${allowableStress.toFixed(2)} ${stressUnit}<br>
+                Joint Efficiency: ${jointEfficiency.toFixed(2)}<br>` : ""}
+                Specific Gravity: ${specificGravity.toFixed(2)}<br>
+                Corrosion Allowance: ${corrosionAllowance.toFixed(3)} ${thicknessUnit}</p>
+                
+                ${calcType === "shell" ? `<p><strong>Note:</strong> This calculation uses the 1-foot method per API 653. For variable design point method, consult the standard.</p>` : 
+                `<p><strong>Note:</strong> This is a basic calculation for minimum bottom plate thickness. Additional considerations may apply based on specific foundation design.</p>`}
+            `;
+            
+            resultDiv.style.display = "block";
+        }
+        
+        // Filter API 653 Table 4.1b based on search criteria
+        function filterAPI653Table() {
+            const searchText = document.getElementById("api653-stress-search").value.toLowerCase();
+            
+            // If search text is provided, filter rows
+            if (searchText) {
+                filterTableRows("api653-astm-table", searchText);
+                filterTableRows("api653-csa-table", searchText);
+                filterTableRows("api653-unknown-table", searchText);
+                filterTableRows("api653-riveted-table", searchText);
+            } else {
+                // Show all rows if no search text
+                showAllTableRows("api653-astm-table");
+                showAllTableRows("api653-csa-table");
+                showAllTableRows("api653-unknown-table");
+                showAllTableRows("api653-riveted-table");
+            }
+        }
+        
+        // Filter rows in a specific table
+        function filterTableRows(tableId, searchText) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const rows = table.getElementsByTagName("tr");
+            
+            // Skip header row (index 0)
+            for (let i = 1; i < rows.length; i++) {
+                const rowContent = rows[i].textContent.toLowerCase();
+                if (rowContent.includes(searchText)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+        
+        // Show all rows in a specific table
+        function showAllTableRows(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const rows = table.getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].style.display = "";
+            }
+        }
+        
+        // Function to toggle Joint Efficiency Table visibility
+        function toggleJointEfficiencyTable() {
+            const table = document.getElementById("joint-efficiency-table");
+            if (table.style.display === "none") {
+                table.style.display = "block";
+            } else {
+                table.style.display = "none";
+            }
+        }
+        
+        // Show the default tab on load
+        document.addEventListener("DOMContentLoaded", function() {
+            const component = document.getElementById("asmeviii-component").value;
+            const diameterLabel = document.getElementById("asmeviii-diameter-label");
+            const diameterTooltip = document.getElementById("asmeviii-diameter-tooltip");
+            
+            if (component.includes("head")) {
+                diameterLabel.innerHTML = 'Crown Radius (L) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Crown radius in inches or mm</span></span>';
+                diameterTooltip.innerText = "Crown radius in inches or mm";
+            } else {
+                diameterLabel.innerHTML = 'Inside Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Inside diameter in inches or mm</span></span>';
+                diameterTooltip.innerText = "Inside diameter in inches or mm";
+            }
+        });
+    </script>
+
+<!-- PDF Export Functionality -->
+<script>
+// Add print-specific CSS
+const printStyle = document.createElement('style');
+printStyle.type = 'text/css';
+printStyle.innerHTML = `
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Then only show the specific result div and its contents */
+  .result-for-print, .result-for-print * {
+    visibility: visible;
+  }
+  
+  /* Position the result at the top of the page */
+  .result-for-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Add a title and date at the top */
+  .print-header {
+    display: block !important;
+    visibility: visible;
+    margin-bottom: 20px;
+  }
+  
+  /* Hide the export button when printing */
+  .export-pdf-btn {
+    display: none !important;
+  }
+  
+  /* Format the page */
+  @page {
+    size: portrait;
+    margin: 2cm;
+  }
+}
+`;
+document.head.appendChild(printStyle);
+
+// Function to add export buttons to all calculators
+function addExportButtons() {
+  // Define the calculators and their result divs
+  const calculators = [
+    { id: 'asmeviii-result', name: 'API 510 - Pressure Vessel' },
+    { id: 'asmeb31-result', name: 'API 570 - Piping' },
+    { id: 'api653-result', name: 'API 653 - Storage Tank' }
+  ];
+  
+  // Modify each calculator function to add export button
+  calculators.forEach(calculator => {
+    const originalFunction = window[getCalcFunctionName(calculator.id)];
+    if (originalFunction) {
+      window[getCalcFunctionName(calculator.id)] = function() {
+        // Call original function
+        originalFunction.apply(this, arguments);
+        
+        // Add export button after a short delay
+        setTimeout(() => {
+          const resultDiv = document.getElementById(calculator.id);
+          if (resultDiv && resultDiv.style.display !== 'none') {
+            // Add export button if it doesn't exist
+            if (!document.getElementById(`export-${calculator.id}`)) {
+              const exportBtn = document.createElement('button');
+              exportBtn.id = `export-${calculator.id}`;
+              exportBtn.className = 'export-pdf-btn';
+              exportBtn.innerHTML = 'Export to PDF';
+              exportBtn.style.marginTop = '15px';
+              exportBtn.style.backgroundColor = '#28a745';
+              exportBtn.style.color = 'white';
+              exportBtn.style.border = 'none';
+              exportBtn.style.padding = '10px 15px';
+              exportBtn.style.borderRadius = '4px';
+              exportBtn.style.cursor = 'pointer';
+              
+              // Add click handler for print
+              exportBtn.onclick = function() {
+                printResult(calculator.id, calculator.name);
+              };
+              
+              resultDiv.appendChild(exportBtn);
+            }
+          }
+        }, 500);
+      };
+    }
+  });
+}
+
+// Helper function to get the calculation function name based on result div id
+function getCalcFunctionName(resultId) {
+  switch(resultId) {
+    case 'asmeviii-result': return 'calculateASMEVIII';
+    case 'asmeb31-result': return 'calculateASMEB31';
+    case 'api653-result': return 'calculateAPI653';
+    default: return '';
+  }
+}
+
+// Function to print a specific result
+function printResult(resultId, calculatorName) {
+  const resultDiv = document.getElementById(resultId);
+  if (!resultDiv) return;
+  
+  // Store original body content
+  const originalContent = document.body.innerHTML;
+  
+  // Create a clone of the result div
+  const printDiv = resultDiv.cloneNode(true);
+  
+  // Add a header with title and date
+  const header = document.createElement('div');
+  header.className = 'print-header';
+  
+  const title = document.createElement('h1');
+  title.textContent = `${calculatorName} Calculation Report`;
+  
+  const date = document.createElement('p');
+  date.textContent = `Generated on: ${new Date().toLocaleString()}`;
+  
+  // Add a divider
+  const divider = document.createElement('hr');
+  
+  header.appendChild(title);
+  header.appendChild(date);
+  header.appendChild(divider);
+  
+  // Create print container
+  const printContainer = document.createElement('div');
+  printContainer.className = 'result-for-print';
+  printContainer.appendChild(header);
+  printContainer.appendChild(printDiv);
+  
+  // Remove export buttons from the print content
+  const exportBtns = printContainer.querySelectorAll('.export-pdf-btn');
+  exportBtns.forEach(btn => btn.parentNode.removeChild(btn));
+  
+  // Replace body content with only what we want to print
+  document.body.innerHTML = '';
+  document.body.appendChild(printContainer);
+  
+  // Print
+  setTimeout(() => {
+    window.print();
+    
+    // Restore original content after printing
+    setTimeout(() => {
+      document.body.innerHTML = originalContent;
+      
+      // Re-add event listeners since we replaced the DOM
+      addExportButtons();
+      
+      // Re-attach other event listeners that were in the original HTML
+      attachOriginalEventListeners();
+    }, 500);
+  }, 500);
+}
+
+// Function to re-attach all original event listeners
+function attachOriginalEventListeners() {
+  // Tab navigation
+  const tablinks = document.getElementsByClassName("tablinks");
+  for (let i = 0; i < tablinks.length; i++) {
+    tablinks[i].addEventListener('click', function(event) {
+      openTab(event, this.textContent.trim());
+    });
+  }
+  
+  // Component selection for ASME VIII
+  const asmeComponent = document.getElementById("asmeviii-component");
+  if (asmeComponent) {
+    asmeComponent.addEventListener("change", function() {
+      const component = this.value;
+      const diameterLabel = document.getElementById("asmeviii-diameter-label");
+      const diameterTooltip = document.getElementById("asmeviii-diameter-tooltip");
+      
+      if (component.includes("head")) {
+        diameterLabel.innerHTML = 'Crown Radius (L) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Crown radius in inches or mm</span></span>';
+        diameterTooltip.innerText = "Crown radius in inches or mm";
+      } else {
+        diameterLabel.innerHTML = 'Inside Diameter (D) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Inside diameter in inches or mm</span></span>';
+        diameterTooltip.innerText = "Inside diameter in inches or mm";
+      }
+    });
+  }
+  
+  // Re-attach calculation button handlers
+  const calcButtons = document.querySelectorAll('button');
+  for (let i = 0; i < calcButtons.length; i++) {
+    const buttonText = calcButtons[i].textContent.trim();
+    if (buttonText === 'Calculate Minimum Thickness') {
+      const parentDiv = calcButtons[i].closest('.tabcontent');
+      if (parentDiv) {
+        const tabId = parentDiv.id;
+        if (tabId === 'API 510') {
+          calcButtons[i].addEventListener('click', calculateASMEVIII);
+        } else if (tabId === 'API 570') {
+          calcButtons[i].addEventListener('click', calculateASMEB31);
+        } else if (tabId === 'API 653') {
+          calcButtons[i].addEventListener('click', calculateAPI653);
+        }
+      }
+    }
+  }
+  
+  // Toggle joint efficiency table
+  const jointEffLinks = document.querySelectorAll('a[onclick*="toggleJointEfficiencyTable"]');
+  for (let i = 0; i < jointEffLinks.length; i++) {
+    jointEffLinks[i].addEventListener('click', function(event) {
+      event.preventDefault();
+      toggleJointEfficiencyTable();
+    });
+  }
+}
+
+// Updated print-specific CSS
+document.head.querySelector('style').textContent += `
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .result-for-print, .result-for-print * {
+    visibility: visible;
+  }
+  
+  .result-for-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  
+  .print-header {
+    margin-bottom: 30px;
+  }
+  
+  @page {
+    size: portrait;
+    margin: 2cm;
+  }
+}
+`;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', addExportButtons);
+</script>
+</body>
+</html>
