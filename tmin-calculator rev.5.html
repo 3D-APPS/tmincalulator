@@ -204,6 +204,7 @@
             <button class="tablinks active" onclick="openTab(event, 'API 510')">API 510</button>
             <button class="tablinks" onclick="openTab(event, 'API 570')">API 570</button>
             <button class="tablinks" onclick="openTab(event, 'API 653')">API 653</button>
+            <button class="tablinks" onclick="openTab(event, 'AllowableStress')">Allowable Stress</button>
             <button class="tablinks" onclick="openTab(event, 'API653-Stresses')">API 653 Table 4.1b</button>
         </div>
         
@@ -223,7 +224,26 @@
                         <option value="nozzle">Nozzle/Opening</option>
                     </select>
                 </div>
-                
+                <div id="AllowableStress" class="tabcontent">
+    <h2>Allowable Stress Information</h2>
+    <div class="calculator">
+        <p>This section provides information and calculations related to allowable stress values.</p>
+        <div class="input-group">
+            <label for="material-type">Material Type</label>
+            <select id="material-type">
+                <option value="steel">Steel</option>
+                <option value="aluminum">Aluminum</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="stress-value">Allowable Stress Value (S)</label>
+            <input type="number" id="stress-value" step="0.001" min="0">
+        </div>
+        <button onclick="calculateAllowableStress()">Calculate Stress</button>
+        <div id="allowable-stress-result" class="result" style="display: none;"></div>
+    </div>
+</div>
                 <h3>Design Parameters</h3>
                 <div class="input-group">
                     <label for="asmeviii-pressure">Design Pressure (P) <span class="tooltip"><span class="info-icon">i</span><span class="tooltiptext">Internal pressure in psi or MPa</span></span></label>
@@ -940,7 +960,19 @@
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
         }
-        
+        function calculateAllowableStress() {
+    const material = document.getElementById("material-type").value;
+    const stressValue = Number(document.getElementById("stress-value").value);
+
+    if (!stressValue) {
+        alert("Please enter a valid stress value!");
+        return;
+    }
+
+    const result = `The allowable stress for ${material} is ${stressValue} units.`;
+    document.getElementById("allowable-stress-result").innerText = result;
+    document.getElementById("allowable-stress-result").style.display = "block";
+}
         // ASME Section VIII Calculator
         function calculateASMEVIII() {
             // Get input values
